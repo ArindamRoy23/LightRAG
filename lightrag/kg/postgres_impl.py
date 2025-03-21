@@ -520,11 +520,14 @@ class PGVectorStorage(BaseVectorStorage):
 
         if ids:
             formatted_ids = ",".join(f"'{id}'" for id in ids)
+            filter_ids = '1'
         else:
             formatted_ids = "NULL"
+            filter_ids = 'NULL'
 
         sql = SQL_TEMPLATES[self.base_namespace].format(
-            embedding_string=embedding_string, doc_ids=formatted_ids
+            embedding_string=embedding_string, doc_ids=formatted_ids, 
+            filter_ids = filter_ids
         )
         params = {
             "workspace": self.db.workspace,
@@ -1759,7 +1762,7 @@ SQL_TEMPLATES = {
     WITH relevant_chunks AS (
         SELECT id as chunk_id
         FROM LIGHTRAG_DOC_CHUNKS
-        WHERE {doc_ids} IS NULL OR full_doc_id = ANY(ARRAY[{doc_ids}])
+        WHERE {filter_ids} IS NULL OR full_doc_id = ANY(ARRAY[{doc_ids}])
     )
     SELECT source_id as src_id, target_id as tgt_id
     FROM (
@@ -1776,7 +1779,7 @@ SQL_TEMPLATES = {
         WITH relevant_chunks AS (
             SELECT id as chunk_id
             FROM LIGHTRAG_DOC_CHUNKS
-            WHERE {doc_ids} IS NULL OR full_doc_id = ANY(ARRAY[{doc_ids}])
+            WHERE {filter_ids} IS NULL OR full_doc_id = ANY(ARRAY[{doc_ids}])
         )
         SELECT entity_name FROM
             (
@@ -1793,7 +1796,7 @@ SQL_TEMPLATES = {
         WITH relevant_chunks AS (
             SELECT id as chunk_id
             FROM LIGHTRAG_DOC_CHUNKS
-            WHERE {doc_ids} IS NULL OR full_doc_id = ANY(ARRAY[{doc_ids}])
+            WHERE {filter_ids} IS NULL OR full_doc_id = ANY(ARRAY[{doc_ids}])
         )
         SELECT id FROM
             (
